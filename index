@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>GolKit — Camisetas de Fútbol Premium</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          green: { 500: '#10B981', 600: '#059669', 400: '#34D399' },
+          gold: { 400: '#FBBF24', 500: '#F59E0B' },
+          navy: { 900: '#0a0f2e', 800: '#0d1545', 700: '#111d5e' },
+        },
+        fontFamily: {
+          oswald: ['Oswald', 'sans-serif'],
+          inter: ['Inter', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0a0f2e;
+    min-height: 100vh;
+  }
+
+  /* App shell: max 480px centered */
+  .app-shell {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #0a0f2e;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+    padding-bottom: 80px; /* space for bottom nav */
+  }
+
+  /* Desktop wrapper bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: #060912;
+    z-index: -1;
+  }
+
+  /* Grass texture overlay */
+  .grass-bg {
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        rgba(16,185,129,0.03) 0px, rgba(16,185,129,0.03) 40px,
+        transparent 40px, transparent 80px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        rgba(16,185,129,0.02) 0px, rgba(16,185,129,0.02) 40px,
+        transparent 40px, transparent 80px
+      );
+  }
+
+  /* Glow effects */
+  .glow-green { box-shadow: 0 0 30px rgba(16,185,129,0.3); }
+  .glow-gold { box-shadow: 0 0 20px rgba(251,191,36,0.4); }
+  .text-glow { text-shadow: 0 0 20px rgba(16,185,129,0.5); }
+
+  /* Hero gradient */
+  .hero-gradient {
+    background: linear-gradient(160deg, #0d1545 0%, #0a0f2e 50%, #051a10 100%);
+  }
+
+  /* Animated green pulse border */
+  @keyframes pulseBorder {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(16,185,129,0); }
+  }
+  .pulse-border { animation: pulseBorder 2s ease-in-out infinite; }
+
+  /* WhatsApp button */
+  .btn-wa {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: white;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border-radius: 14px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn-wa:hover, .btn-wa:active { transform: scale(0.97); filter: brightness(1.1); }
+
+  /* Price cards */
+  .price-card {
+    background: linear-gradient(135deg, rgba(13,21,69,0.9) 0%, rgba(10,15,46,0.95) 100%);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .price-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #10B981, transparent);
+  }
+  .price-card:hover { border-color: rgba(16,185,129,0.5); transform: translateY(-2px); }
+  .price-card.featured {
+    border-color: rgba(251,191,36,0.4);
+    background: linear-gradient(135deg, rgba(20,16,5,0.95) 0%, rgba(10,15,46,0.95) 100%);
+  }
+  .price-card.featured::before {
+    background: linear-gradient(90deg, transparent, #FBBF24, transparent);
+  }
+
+  /* Step cards */
+  .step-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+  }
+
+  /* WhatsApp message bubbles (testimonials) */
+  .bubble {
+    background: #1a4731;
+    border-radius: 16px 16px 4px 16px;
+    position: relative;
+  }
+  .bubble::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: -8px;
+    border: 8px solid transparent;
+    border-left-color: #1a4731;
+    border-bottom-color: #1a4731;
+    border-right: 0;
+    border-bottom-width: 4px;
+  }
+
+  /* Stars */
+  .stars { color: #FBBF24; }
+
+  /* FAQ accordion */
+  .faq-item { border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+  }
+  .faq-answer.open { max-height: 200px; }
+  .faq-arrow { transition: transform 0.3s; }
+  .faq-arrow.open { transform: rotate(180deg); }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: rgba(8,12,36,0.97);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(16,185,129,0.2);
+    z-index: 100;
+    padding: 8px 0 12px;
+  }
+  .nav-item { transition: color 0.2s; }
+  .nav-item.active { color: #10B981; }
+  .nav-item:not(.active) { color: rgba(255,255,255,0.4); }
+  .nav-wa-btn {
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    border-radius: 14px;
+    padding: 6px 14px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  /* Section headers */
+  .section-tag {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #10B981;
+    opacity: 0.8;
+  }
+  .section-title {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    line-height: 1.1;
+    color: white;
+  }
+
+  /* Guarantee pills */
+  .guarantee-pill {
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Floating WhatsApp */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .float-anim { animation: float 3s ease-in-out infinite; }
+
+  /* Shimmer on price */
+  @keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+  }
+  .price-shimmer {
+    background: linear-gradient(90deg, #10B981 0%, #34D399 40%, #10B981 80%);
+    background-size: 200px 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 3s linear infinite;
+  }
+
+  /* Stadium silhouette at hero bottom */
+  .stadium-silhouette {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 80px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 80'%3E%3Cpath d='M0 80 L0 50 Q20 35 40 50 L40 30 Q60 10 80 30 L80 20 Q100 0 120 20 L120 30 Q140 10 160 30 L160 50 Q180 35 200 50 L200 40 Q220 20 240 40 L240 50 Q260 35 280 50 L280 30 Q300 10 320 30 L320 20 Q340 0 360 20 L360 30 Q380 10 400 30 L400 50 Q420 35 440 50 L440 30 Q460 15 480 30 L480 80 Z' fill='rgba(5,10,30,0.8)'/%3E%3C/svg%3E") bottom center / cover no-repeat;
+    opacity: 0.6;
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Badge */
+  .badge-popular {
+    background: linear-gradient(135deg, #FBBF24, #F59E0B);
+    color: #0a0f2e;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+
+  /* Divider */
+  .green-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #10B981, transparent);
+    opacity: 0.3;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell grass-bg">
+
+  <!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+  <section id="inicio" class="hero-gradient relative overflow-hidden">
+
+    <!-- Background glow blobs -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full opacity-10" style="background:radial-gradient(circle,#10B981,transparent);filter:blur(40px);"></div>
+    <div class="absolute bottom-10 right-0 w-48 h-48 rounded-full opacity-8" style="background:radial-gradient(circle,#111d5e,transparent);filter:blur(30px);"></div>
+
+    <!-- Logo placeholder -->
+    <div class="flex justify-center pt-10 pb-4 px-6">
+      <div class="h-28 w-52 rounded-2xl border-2 border-dashed border-green-500/20 flex items-center justify-center" style="background:rgba(16,185,129,0.04);">
+        <span class="text-white/20 text-xs text-center leading-relaxed">Tu logo<br>aquí</span>
+      </div>
+    </div>
+
+    <!-- Hero text -->
+    <div class="px-5 pt-2 pb-6 text-center relative z-10">
+      <div class="section-tag mb-2">Camisetas de importación premium</div>
+      <h1 class="section-title text-4xl mb-3">
+        Tu pasión,<br>
+        <span class="price-shimmer">en tu espalda.</span>
+      </h1>
+      <p class="text-white/60 text-sm leading-relaxed mb-6">
+        Las mejores camisetas de fútbol de importación premium. Nombre, número y parches incluidos. 
+        <strong class="text-white/80">Envío a toda España.</strong>
+      </p>
+
+      <!-- Main CTA -->
+      <a href="https://wa.me/34600000000?text=Hola!%20Quiero%20informaci%C3%B3n%20sobre%20una%20camiseta" class="btn-wa w-full py-4 text-lg pulse-border mb-3 glow-green">
+        <i class="fa-brands fa-whatsapp text-2xl"></i>
+        Ver Catálogo por WhatsApp
+      </a>
+      <p class="text-white/30 text-xs">Respuesta en menos de 24h · Atención en castellano</p>
+    </div>
+
+    <!-- Quick trust badges -->
+    <div class="flex justify-around px-4 pb-8 gap-2">
+      <div class="flex flex-col items-center gap-1">
+        <div class="w-10 h-10 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-shield-halved text-green-400 text-sm"></i>
+        </div>
+        <span class="text-white/50 text-xs text-center">Pago<br>Bizum</span>
+      </div>
+      <div class="flex flex-col items-center gap-1">
+        <div class="w-10 h-10 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-camera text-green-400 text-sm"></i>
+        </div>
+        <span class="text-white/50 text-xs text-center">Fotos<br>reales</span>
+      </div>
+      <div class="flex flex-col items-center gap-1">
+        <div class="w-10 h-10 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-comments text-green-400 text-sm"></i>
+        </div>
+        <span class="text-white/50 text-xs text-center">100%<br>Castellano</span>
+      </div>
+      <div class="flex flex-col items-center gap-1">
+        <div class="w-10 h-10 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+          <i class="fa-solid fa-truck text-green-400 text-sm"></i>
+        </div>
+        <span class="text-white/50 text-xs text-center">Envío<br>España</span>
+      </div>
+    </div>
+
+    <div class="stadium-silhouette"></div>
+  </section>
+
+  <div class="green-divider mx-5 my-0"></div>
+
+  <!-- ═══════════════════════════════ CÓMO FUNCIONA ═══════════════════════════════ -->
+  <section id="como" class="px-5 py-8">
+    <div class="text-center mb-6 reveal">
+      <div class="section-tag mb-1">Simple y rápido</div>
+      <h2 class="section-title text-3xl">¿Cómo funciona?</h2>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <!-- Step 1 -->
+      <div class="step-card p-4 flex gap-4 items-start reveal">
+        <div class="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style="background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(16,185,129,0.05));">
+          👕
+        </div>
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-green-400 font-oswald font-bold text-xs tracking-widest">PASO 1</span>
+          </div>
+          <h3 class="text-white font-semibold text-sm mb-1">Elige tu camiseta y talla</h3>
+          <p class="text-white/50 text-xs leading-relaxed">Explora el catálogo y cuéntanos qué equipo, jugador, nombre y talla quieres. También retro, vintage o infantil.</p>
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="flex justify-center">
+        <i class="fa-solid fa-chevron-down text-green-500/30 text-xl"></i>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card p-4 flex gap-4 items-start reveal">
+        <div class="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style="background:linear-gradient(135deg,rgba(37,211,102,0.2),rgba(37,211,102,0.05));">
+          💬
+        </div>
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-green-400 font-oswald font-bold text-xs tracking-widest">PASO 2</span>
+          </div>
+          <h3 class="text-white font-semibold text-sm mb-1">Escríbenos por WhatsApp</h3>
+          <p class="text-white/50 text-xs leading-relaxed">Te confirmamos disponibilidad, te mandamos fotos reales del producto y cerramos el pedido. Pago cómodo por Bizum.</p>
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="flex justify-center">
+        <i class="fa-solid fa-chevron-down text-green-500/30 text-xl"></i>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card p-4 flex gap-4 items-start reveal">
+        <div class="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style="background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(251,191,36,0.05));">
+          📦
+        </div>
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-gold-400 font-oswald font-bold text-xs tracking-widest" style="color:#FBBF24;">PASO 3</span>
+          </div>
+          <h3 class="text-white font-semibold text-sm mb-1">La recibes en casa</h3>
+          <p class="text-white/50 text-xs leading-relaxed">Envío certificado a toda España vía Correos o InPost. Te mandamos el número de seguimiento.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <a href="https://wa.me/34600000000?text=Hola!%20Quiero%20informaci%C3%B3n%20sobre%20una%20camiseta" class="btn-wa w-full py-3.5 text-base mt-5 reveal">
+      <i class="fa-brands fa-whatsapp text-xl"></i>
+      Empezar mi pedido
+    </a>
+  </section>
+
+  <div class="green-divider mx-5"></div>
+
+  <!-- ═══════════════════════════════ PRECIOS ═══════════════════════════════ -->
+  <section id="precios" class="px-5 py-8">
+    <div class="text-center mb-6 reveal">
+      <div class="section-tag mb-1">Sin letra pequeña</div>
+      <h2 class="section-title text-3xl">Precios claros</h2>
+      <p class="text-white/50 text-xs mt-2">Nombre, número y parches siempre incluidos</p>
+    </div>
+
+    <div class="flex flex-col gap-3">
+
+      <!-- Fan -->
+      <div class="price-card p-4 reveal">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-2xl">⚽</span>
+              <span class="text-white font-oswald font-bold text-lg leading-tight">Camiseta Fan</span>
+            </div>
+            <p class="text-white/50 text-xs">Réplica oficial · Tejido ligero</p>
+          </div>
+          <div class="text-right">
+            <div class="price-shimmer font-oswald font-bold text-3xl leading-none">30€</div>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-1.5 mb-3">
+          <span class="bg-green-500/10 border border-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full">✓ Nombre</span>
+          <span class="bg-green-500/10 border border-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full">✓ Número</span>
+          <span class="bg-green-500/10 border border-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full">✓ Parches</span>
+        </div>
+        <a href="https://wa.me/34600000000?text=Hola!%20Quiero%20informaci%C3%B3n%20sobre%20una%20camiseta" class="btn-wa w-full py-2.5 text-sm">
+          <i class="fa-brands fa-whatsapp"></i> Pedir esta camiseta
+        </a>
+      </div>
+
+      <!-- Player Version -->
+      <div class="price-card p-4 reveal">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-2xl">🏆</span>
+              <span class="text-white font-oswald font-bold text-lg leading-tight">Player Version</span>
+            </div>
+            <p class="text-white/50 text-xs">Calidad jugador · Tejido técnico de alto rendimiento</p>
+          </div>
+          <div class="text-right">
+            <div class="price-shimmer font-oswald font-bold text-3xl leading-none">35€</div>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-1.5 mb-3">
+          <span class="bg-green-500/10 border border-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full">✓ Nombre</span>
+          <span class="bg-green-500/10 border border-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full">✓ Número</span>
+          <span class="bg-green-500/10 border border-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full">✓ Parches</span>
+          <span class="bg-green-500/10 border border-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full">✓ Tejido premium</span>
+        </div>
+        <a href="https://wa.me/34600000000?text=Hola!%20Quiero%20informaci%C3%B3n%20sobre%20una%20camiseta" class="btn-wa w-full py-2.5 text-sm">
+          <i class="fa-brands fa-whatsapp"></i> Pedir esta camiseta
+        </a>
+      </div>
+
+      <!-- Retro — DESTACADA -->
+      <div class="price-card p-5 reveal" style="border:2px solid rgba(251,191,36,0.55);background:linear-gradient(145deg,rgba(30,20,5,0.97) 0%,rgba(10,15,46,0.97) 100%);box-shadow:0 0 40px rgba(251,191,36,0.15),inset 0 0 60px rgba(251,191,36,0.03);">
+        <!-- Top glow line gold -->
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#FBBF24,#F59E0B,transparent);border-radius:2px 2px 0 0;"></div>
+
+        <!-- Crown + label -->
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">👑</span>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-white font-oswald font-bold text-xl leading-tight">Camiseta Retro</span>
+              </div>
+              <p class="text-xs mt-0.5" style="color:rgba(251,191,36,0.7);">La joya de nuestra tienda</p>
+            </div>
+          </div>
+          <div class="text-right flex-shrink-0">
+            <div class="font-oswald font-bold text-4xl leading-none" style="background:linear-gradient(135deg,#FBBF24,#FDE68A,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">35€</div>
+          </div>
+        </div>
+
+        <!-- Star badges row -->
+        <div class="flex items-center gap-1 mb-3">
+          <span style="color:#FBBF24;font-size:0.75rem;">★★★★★</span>
+          <span class="badge-popular ml-1">Nuestra favorita</span>
+        </div>
+
+        <p class="text-sm leading-relaxed mb-4" style="color:rgba(255,255,255,0.65);">
+          Colecciones vintage de los grandes momentos del fútbol. Tejidos y escudos fieles a los originales de época. Para los que saben de fútbol de verdad.
+        </p>
+
+        <div class="flex flex-wrap gap-1.5 mb-4">
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.35);color:#FBBF24;">✓ Nombre</span>
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.35);color:#FBBF24;">✓ Número</span>
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.35);color:#FBBF24;">✓ Parches</span>
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.35);color:#FBBF24;">✓ Edición vintage</span>
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.35);color:#FBBF24;">✓ Colección limitada</span>
+        </div>
+
+        <!-- Gold CTA -->
+        <a href="https://wa.me/34600000000?text=Hola!%20Quiero%20informaci%C3%B3n%20sobre%20una%20camiseta" class="w-full py-3.5 text-base font-oswald font-bold rounded-xl flex items-center justify-center gap-2 pulse-border" style="background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#0a0f2e;box-shadow:0 4px 20px rgba(251,191,36,0.35);">
+          <i class="fa-brands fa-whatsapp text-xl"></i>
+          Pedir Camiseta Retro
+        </a>
+        <p class="text-center text-xs mt-2" style="color:rgba(251,191,36,0.4);">La más solicitada por nuestros clientes</p>
+      </div>
+
+    </div>
+
+    <!-- Shipping note -->
+    <div class="mt-4 p-3 rounded-xl reveal" style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);">
+      <div class="flex items-start gap-2">
+        <i class="fa-solid fa-truck text-green-400 text-sm mt-0.5 flex-shrink-0"></i>
+        <p class="text-white/60 text-xs leading-relaxed">
+          <strong class="text-white/80">Envío nacional certificado</strong> vía Correos/InPost por <strong class="text-green-400">+4€</strong> · 
+          <strong class="text-gold-400" style="color:#FBBF24;">¡Gratis a partir de 3 prendas!</strong>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="green-divider mx-5"></div>
+
+  <!-- ═══════════════════════════════ GARANTÍAS ═══════════════════════════════ -->
+  <section class="px-5 py-8">
+    <div class="text-center mb-6 reveal">
+      <div class="section-tag mb-1">Tu tranquilidad, primero</div>
+      <h2 class="section-title text-3xl">Compra con confianza</h2>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <div class="guarantee-pill reveal">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.15);">
+          <i class="fa-solid fa-comments text-green-400 text-lg"></i>
+        </div>
+        <div>
+          <p class="text-white font-semibold text-sm">Atención 100% en Castellano</p>
+          <p class="text-white/45 text-xs">Hablas con una persona real, no con un bot</p>
+        </div>
+      </div>
+
+      <div class="guarantee-pill reveal">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.15);">
+          <i class="fa-solid fa-mobile-screen text-green-400 text-lg"></i>
+        </div>
+        <div>
+          <p class="text-white font-semibold text-sm">Pago seguro por Bizum</p>
+          <p class="text-white/45 text-xs">Cómodo, rápido y sin comisiones</p>
+        </div>
+      </div>
+
+      <div class="guarantee-pill reveal">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.15);">
+          <i class="fa-solid fa-camera text-green-400 text-lg"></i>
+        </div>
+        <div>
+          <p class="text-white font-semibold text-sm">Fotos reales antes del envío</p>
+          <p class="text-white/45 text-xs">Ves exactamente lo que vas a recibir</p>
+        </div>
+      </div>
+
+      <div class="guarantee-pill reveal">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.15);">
+          <i class="fa-solid fa-box-open text-green-400 text-lg"></i>
+        </div>
+        <div>
+          <p class="text-white font-semibold text-sm">Seguimiento del envío</p>
+          <p class="text-white/45 text-xs">Número de tracking por WhatsApp</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="green-divider mx-5"></div>
+
+  <!-- ═══════════════════════════════ TESTIMONIOS ═══════════════════════════════ -->
+  <section id="testimonios" class="px-5 py-8">
+    <div class="text-center mb-6 reveal">
+      <div class="section-tag mb-1">Lo que dicen nuestros clientes</div>
+      <h2 class="section-title text-3xl">Reseñas reales</h2>
+    </div>
+
+    <div class="flex flex-col gap-4">
+
+      <!-- Testimonial 1 -->
+      <div class="reveal">
+        <div class="flex items-center gap-2 mb-2 px-1">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-navy-900" style="background:linear-gradient(135deg,#10B981,#059669);color:#0a0f2e;">J</div>
+          <div>
+            <p class="text-white text-xs font-semibold">Javi · Madrid</p>
+            <div class="stars text-xs">★★★★★</div>
+          </div>
+          <div class="ml-auto">
+            <i class="fa-brands fa-whatsapp text-green-400 text-sm opacity-50"></i>
+          </div>
+        </div>
+        <div class="bubble p-3">
+          <p class="text-white/90 text-sm leading-relaxed">La camiseta del Madrid llegó perfecta. El tejido es una pasada, mucho mejor de lo que esperaba. El parche de La Liga está impecable. 100% recomendado 🔥</p>
+          <p class="text-white/30 text-xs mt-1 text-right">12:34 ✓✓</p>
+        </div>
+      </div>
+
+      <!-- Testimonial 2 -->
+      <div class="reveal">
+        <div class="flex items-center gap-2 mb-2 px-1">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8);color:white;">C</div>
+          <div>
+            <p class="text-white text-xs font-semibold">Carlos · Valencia</p>
+            <div class="stars text-xs">★★★★★</div>
+          </div>
+          <div class="ml-auto">
+            <i class="fa-brands fa-whatsapp text-green-400 text-sm opacity-50"></i>
+          </div>
+        </div>
+        <div class="bubble p-3">
+          <p class="text-white/90 text-sm leading-relaxed">Pedí la Player Version del Barça con mi nombre. Me mandaron fotos antes de enviarlo y llegó en 18 días. Calidad brutal, idéntica a la original 👌</p>
+          <p class="text-white/30 text-xs mt-1 text-right">18:52 ✓✓</p>
+        </div>
+      </div>
+
+      <!-- Testimonial 3 -->
+      <div class="reveal">
+        <div class="flex items-center gap-2 mb-2 px-1">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style="background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#0a0f2e;">A</div>
+          <div>
+            <p class="text-white text-xs font-semibold">Ana · Sevilla</p>
+            <div class="stars text-xs">★★★★★</div>
+          </div>
+          <div class="ml-auto">
+            <i class="fa-brands fa-whatsapp text-green-400 text-sm opacity-50"></i>
+          </div>
+        </div>
+        <div class="bubble p-3">
+          <p class="text-white/90 text-sm leading-relaxed">Compré 3 camisetas para el cumple de mi hijo y el envío salió gratis. Llegaron todas perfectas, el niño alucinó. Ya estoy pensando en el siguiente pedido 😂</p>
+          <p class="text-white/30 text-xs mt-1 text-right">09:15 ✓✓</p>
+        </div>
+      </div>
+
+      <!-- Testimonial 4 -->
+      <div class="reveal">
+        <div class="flex items-center gap-2 mb-2 px-1">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:white;">M</div>
+          <div>
+            <p class="text-white text-xs font-semibold">Miguel · Bilbao</p>
+            <div class="stars text-xs">★★★★★</div>
+          </div>
+          <div class="ml-auto">
+            <i class="fa-brands fa-whatsapp text-green-400 text-sm opacity-50"></i>
+          </div>
+        </div>
+        <div class="bubble p-3">
+          <p class="text-white/90 text-sm leading-relaxed">La retro del Deportivo del 2000 es una obra de arte. Pensé que no la encontraría nunca y aquí estaba. Atención rapidísima y muy maja la persona. ¡Gracias!</p>
+          <p class="text-white/30 text-xs mt-1 text-right">20:07 ✓✓</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="green-divider mx-5"></div>
+
+  <div class="green-divider mx-5"></div>
+
+  <!-- ═══════════════════════════════ GALERÍA REAL ═══════════════════════════════ -->
+  <section class="py-8">
+    <div class="text-center mb-6 px-5 reveal">
+      <div class="section-tag mb-1">📸 Fotos reales de pedidos enviados</div>
+      <h2 class="section-title text-3xl">Lo que reciben<br>nuestros clientes</h2>
+      <p class="text-white/45 text-xs mt-2 leading-relaxed">Cada foto es un pedido real. Sin filtros, sin trampa.</p>
+    </div>
+
+    <!-- Mosaic grid -->
+    <div class="px-3">
+
+      <!-- Row 1: 2 equal -->
+      <div class="flex gap-2 mb-2">
+        <div class="flex-1 aspect-square rounded-2xl overflow-hidden relative reveal" style="background:rgba(255,255,255,0.04);border:1.5px dashed rgba(16,185,129,0.2);">
+          <!-- SLOT 1: reemplaza este div por <img src="TU_FOTO" class="w-full h-full object-cover"> -->
+          <div class="w-full h-full flex flex-col items-center justify-center gap-2 p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:rgba(16,185,129,0.1);">
+              <i class="fa-solid fa-camera text-green-500/40 text-lg"></i>
+            </div>
+            <span class="text-white/20 text-xs text-center leading-tight">Foto 1</span>
+          </div>
+          <!-- Badge categoría -->
+          <div class="absolute bottom-2 left-2">
+            <span class="text-xs px-2 py-0.5 rounded-full font-semibold" style="background:rgba(0,0,0,0.7);color:rgba(255,255,255,0.5);backdrop-filter:blur(4px);">Fan</span>
+          </div>
+        </div>
+
+        <div class="flex-1 aspect-square rounded-2xl overflow-hidden relative reveal" style="background:rgba(255,255,255,0.04);border:1.5px dashed rgba(16,185,129,0.2);">
+          <!-- SLOT 2 -->
+          <div class="w-full h-full flex flex-col items-center justify-center gap-2 p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:rgba(16,185,129,0.1);">
+              <i class="fa-solid fa-camera text-green-500/40 text-lg"></i>
+            </div>
+            <span class="text-white/20 text-xs text-center leading-tight">Foto 2</span>
+          </div>
+          <div class="absolute bottom-2 left-2">
+            <span class="text-xs px-2 py-0.5 rounded-full font-semibold" style="background:rgba(0,0,0,0.7);color:rgba(255,255,255,0.5);backdrop-filter:blur(4px);">Player</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: 1 wide + 1 small stack -->
+      <div class="flex gap-2 mb-2">
+        <!-- Wide photo (2/3) -->
+        <div class="rounded-2xl overflow-hidden relative reveal" style="flex:2;aspect-ratio:4/3;background:rgba(255,255,255,0.04);border:1.5px dashed rgba(251,191,36,0.25);">
+          <!-- SLOT 3: foto destacada retro -->
+          <div class="w-full h-full flex flex-col items-center justify-center gap-2 p-3">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background:rgba(251,191,36,0.1);">
+              <span class="text-2xl">👑</span>
+            </div>
+            <span class="text-xs text-center leading-tight" style="color:rgba(251,191,36,0.35);">Foto Retro<br>destacada</span>
+          </div>
+          <div class="absolute bottom-2 left-2">
+            <span class="text-xs px-2 py-0.5 rounded-full font-semibold" style="background:rgba(0,0,0,0.75);color:#FBBF24;backdrop-filter:blur(4px);">👑 Retro</span>
+          </div>
+        </div>
+
+        <!-- Narrow stack (1/3) -->
+        <div class="flex flex-col gap-2" style="flex:1;">
+          <div class="rounded-2xl overflow-hidden relative reveal" style="flex:1;aspect-ratio:1;background:rgba(255,255,255,0.04);border:1.5px dashed rgba(16,185,129,0.2);">
+            <!-- SLOT 4 -->
+            <div class="w-full h-full flex flex-col items-center justify-center gap-1">
+              <i class="fa-solid fa-camera text-green-500/30 text-base"></i>
+              <span class="text-white/15 text-xs">Foto 4</span>
+            </div>
+            <div class="absolute bottom-1.5 left-1.5">
+              <span class="text-xs px-1.5 py-0.5 rounded-full font-semibold" style="background:rgba(0,0,0,0.7);color:rgba(255,255,255,0.4);backdrop-filter:blur(4px);font-size:0.6rem;">Infantil</span>
+            </div>
+          </div>
+          <div class="rounded-2xl overflow-hidden relative reveal" style="flex:1;aspect-ratio:1;background:rgba(255,255,255,0.04);border:1.5px dashed rgba(16,185,129,0.2);">
+            <!-- SLOT 5 -->
+            <div class="w-full h-full flex flex-col items-center justify-center gap-1">
+              <i class="fa-solid fa-camera text-green-500/30 text-base"></i>
+              <span class="text-white/15 text-xs">Foto 5</span>
+            </div>
+            <div class="absolute bottom-1.5 left-1.5">
+              <span class="text-xs px-1.5 py-0.5 rounded-full font-semibold" style="background:rgba(0,0,0,0.7);color:rgba(255,255,255,0.4);backdrop-filter:blur(4px);font-size:0.6rem;">Fan</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3: 3 equal small -->
+      <div class="flex gap-2 mb-2">
+        <div class="flex-1 rounded-2xl overflow-hidden relative reveal" style="aspect-ratio:1;background:rgba(255,255,255,0.04);border:1.5px dashed rgba(16,185,129,0.2);">
+          <!-- SLOT 6 -->
+          <div class="w-full h-full flex flex-col items-center justify-center gap-1">
+            <i class="fa-solid fa-camera text-green-500/30 text-base"></i>
+            <span class="text-white/15 text-xs">Foto 6</span>
+          </div>
+          <div class="absolute bottom-1.5 left-1.5">
+            <span class="text-xs px-1.5 py-0.5 rounded-full" style="background:rgba(0,0,0,0.7);color:rgba(255,255,255,0.4);backdrop-filter:blur(4px);font-size:0.6rem;">Retro</span>
+          </div>
+        </div>
+        <div class="flex-1 rounded-2xl overflow-hidden relative reveal" style="aspect-ratio:1;background:rgba(255,255,255,0.04);border:1.5px dashed rgba(16,185,129,0.2);">
+          <!-- SLOT 7 -->
+          <div class="w-full h-full flex flex-col items-center justify-center gap-1">
+            <i class="fa-solid fa-camera text-green-500/30 text-base"></i>
+            <span class="text-white/15 text-xs">Foto 7</span>
+          </div>
+          <div class="absolute bottom-1.5 left-1.5">
+            <span class="text-xs px-1.5 py-0.5 rounded-full" style="background:rgba(0,0,0,0.7);color:rgba(255,255,255,0.4);backdrop-filter:blur(4px);font-size:0.6rem;">Player</span>
+          </div>
+        </div>
+        <div class="flex-1 rounded-2xl overflow-hidden relative reveal" style="aspect-ratio:1;background:rgba(255,255,255,0.04);border:1.5px dashed rgba(16,185,129,0.2);">
+          <!-- SLOT 8 -->
+          <div class="w-full h-full flex flex-col items-center justify-center gap-1">
+            <i class="fa-solid fa-camera text-green-500/30 text-base"></i>
+            <span class="text-white/15 text-xs">Foto 8</span>
+          </div>
+          <div class="absolute bottom-1.5 left-1.5">
+            <span class="text-xs px-1.5 py-0.5 rounded-full" style="background:rgba(0,0,0,0.7);color:rgba(255,255,255,0.4);backdrop-filter:blur(4px);font-size:0.6rem;">Fan</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 4: 1 full width tall -->
+      <div class="mb-2 reveal">
+        <div class="w-full rounded-2xl overflow-hidden relative" style="aspect-ratio:16/9;background:rgba(255,255,255,0.04);border:1.5px dashed rgba(251,191,36,0.2);">
+          <!-- SLOT 9: foto panorámica / grupo de camisetas -->
+          <div class="w-full h-full flex flex-col items-center justify-center gap-2">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background:rgba(16,185,129,0.08);">
+              <i class="fa-solid fa-images text-green-500/30 text-xl"></i>
+            </div>
+            <span class="text-white/20 text-xs text-center leading-relaxed">Foto panorámica<br>o grupo de pedidos</span>
+          </div>
+          <div class="absolute bottom-2 left-2">
+            <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(0,0,0,0.75);color:rgba(255,255,255,0.4);backdrop-filter:blur(4px);">📦 Pedido real</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 5: 2 equal -->
+      <div class="flex gap-2">
+        <div class="flex-1 aspect-square rounded-2xl overflow-hidden relative reveal" style="background:rgba(255,255,255,0.04);border:1.5px dashed rgba(16,185,129,0.2);">
+          <!-- SLOT 10 -->
+          <div class="w-full h-full flex flex-col items-center justify-center gap-2">
+            <i class="fa-solid fa-camera text-green-500/30 text-lg"></i>
+            <span class="text-white/20 text-xs">Foto 10</span>
+          </div>
+          <div class="absolute bottom-2 left-2">
+            <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(0,0,0,0.7);color:rgba(255,255,255,0.5);backdrop-filter:blur(4px);">Retro</span>
+          </div>
+        </div>
+        <div class="flex-1 aspect-square rounded-2xl overflow-hidden relative reveal" style="background:rgba(255,255,255,0.04);border:1.5px dashed rgba(16,185,129,0.2);">
+          <!-- SLOT 11 -->
+          <div class="w-full h-full flex flex-col items-center justify-center gap-2">
+            <i class="fa-solid fa-camera text-green-500/30 text-lg"></i>
+            <span class="text-white/20 text-xs">Foto 11</span>
+          </div>
+          <div class="absolute bottom-2 left-2">
+            <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(0,0,0,0.7);color:rgba(255,255,255,0.5);backdrop-filter:blur(4px);">Player</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Counter strip -->
+    <div class="flex justify-around items-center mx-5 mt-5 py-3 px-4 rounded-2xl reveal" style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);">
+      <div class="text-center">
+        <div class="font-oswald font-bold text-2xl text-green-400">+50</div>
+        <div class="text-white/40 text-xs">Pedidos<br>enviados</div>
+      </div>
+      <div class="w-px h-8" style="background:rgba(255,255,255,0.08);"></div>
+      <div class="text-center">
+        <div class="font-oswald font-bold text-2xl text-green-400">100%</div>
+        <div class="text-white/40 text-xs">Fotos<br>reales</div>
+      </div>
+      <div class="w-px h-8" style="background:rgba(255,255,255,0.08);"></div>
+      <div class="text-center">
+        <div class="font-oswald font-bold text-2xl" style="color:#FBBF24;">★ 5.0</div>
+        <div class="text-white/40 text-xs">Valoración<br>media</div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="px-5 mt-5 reveal">
+      <a href="https://wa.me/34600000000?text=Hola!%20Quiero%20informaci%C3%B3n%20sobre%20una%20camiseta" class="btn-wa w-full py-3.5 text-base">
+        <i class="fa-brands fa-whatsapp text-xl"></i>
+        ¿Quieres la tuya? Escríbenos
+      </a>
+    </div>
+  </section>
+
+    <!-- ═══════════════════════════════ FAQ ═══════════════════════════════ -->
+  <section class="px-5 py-8">
+    <div class="text-center mb-6 reveal">
+      <div class="section-tag mb-1">Resolvemos tus dudas</div>
+      <h2 class="section-title text-3xl">Preguntas frecuentes</h2>
+    </div>
+
+    <div class="rounded-2xl overflow-hidden reveal" style="border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.03);">
+
+      <div class="faq-item">
+        <button class="faq-btn w-full flex items-center justify-between p-4 text-left" onclick="toggleFaq(this)">
+          <span class="text-white text-sm font-medium pr-4">¿Cuánto tarda en llegar mi pedido?</span>
+          <i class="fa-solid fa-chevron-down text-green-400 text-xs faq-arrow flex-shrink-0"></i>
+        </button>
+        <div class="faq-answer px-4">
+          <p class="text-white/55 text-xs leading-relaxed pb-4">Al ser camisetas bajo pedido de importación, el plazo habitual es de <strong class="text-white/75">15 a 25 días hábiles</strong>. Te mandamos el número de seguimiento en cuanto salga el paquete. Es la espera justa para recibir calidad premium a ese precio.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-btn w-full flex items-center justify-between p-4 text-left" onclick="toggleFaq(this)">
+          <span class="text-white text-sm font-medium pr-4">¿Cómo elijo bien la talla?</span>
+          <i class="fa-solid fa-chevron-down text-green-400 text-xs faq-arrow flex-shrink-0"></i>
+        </button>
+        <div class="faq-answer px-4">
+          <p class="text-white/55 text-xs leading-relaxed pb-4">Para la <strong class="text-white/75">Fan Version</strong>, elige tu talla habitual. Para la <strong class="text-white/75">Player Version</strong>, recomendamos subir una talla, ya que el corte es más ajustado (estilo atlético). ¡Consúltanos sin compromiso y te asesoramos!</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-btn w-full flex items-center justify-between p-4 text-left" onclick="toggleFaq(this)">
+          <span class="text-white text-sm font-medium pr-4">¿Cómo pago? ¿Es seguro?</span>
+          <i class="fa-solid fa-chevron-down text-green-400 text-xs faq-arrow flex-shrink-0"></i>
+        </button>
+        <div class="faq-answer px-4">
+          <p class="text-white/55 text-xs leading-relaxed pb-4">El pago se realiza por <strong class="text-white/75">Bizum</strong>, una vez confirmado el pedido por WhatsApp. Rápido, sin comisiones y 100% español. Solo pedimos el pago después de que tú hayas confirmado todos los detalles del pedido.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-btn w-full flex items-center justify-between p-4 text-left" onclick="toggleFaq(this)">
+          <span class="text-white text-sm font-medium pr-4">¿Puedo pedir cualquier equipo y jugador?</span>
+          <i class="fa-solid fa-chevron-down text-green-400 text-xs faq-arrow flex-shrink-0"></i>
+        </button>
+        <div class="faq-answer px-4">
+          <p class="text-white/55 text-xs leading-relaxed pb-4">Tenemos una disponibilidad altísima: <strong class="text-white/75">Premier League, La Liga, Champions, Serie A, Bundesliga, Ligue 1</strong> y muchos más. ¡Escríbenos y te confirmamos si tenemos el tuyo!</p>
+        </div>
+      </div>
+
+      <div class="faq-item" style="border-bottom:none;">
+        <button class="faq-btn w-full flex items-center justify-between p-4 text-left" onclick="toggleFaq(this)">
+          <span class="text-white text-sm font-medium pr-4">¿Y si hay algún problema con mi pedido?</span>
+          <i class="fa-solid fa-chevron-down text-green-400 text-xs faq-arrow flex-shrink-0"></i>
+        </button>
+        <div class="faq-answer px-4">
+          <p class="text-white/55 text-xs leading-relaxed pb-4">Te atendemos directamente por WhatsApp. Si la prenda llega con algún defecto, lo gestionamos contigo de forma personal y buscamos siempre la mejor solución. La satisfacción del cliente es nuestra prioridad.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ CTA FINAL ═══════════════════════════════ -->
+  <section class="px-5 py-8 text-center">
+    <div class="reveal" style="background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(13,21,69,0.8));border:1px solid rgba(16,185,129,0.25);border-radius:24px;padding:28px 20px;">
+      
+      <div class="float-anim inline-block mb-4">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style="background:linear-gradient(135deg,#25D366,#128C7E);">
+          <i class="fa-brands fa-whatsapp text-white text-3xl"></i>
+        </div>
+      </div>
+
+      <h2 class="section-title text-3xl mb-2">¿Lista tu camiseta?</h2>
+      <p class="text-white/55 text-sm leading-relaxed mb-6">
+        Un mensaje y en menos de 24h tienes confirmación, fotos y precio. Sin compromisos.
+      </p>
+
+      <a href="https://wa.me/34600000000?text=Hola!%20Quiero%20informaci%C3%B3n%20sobre%20una%20camiseta" class="btn-wa w-full py-4 text-lg pulse-border glow-green mb-3">
+        <i class="fa-brands fa-whatsapp text-2xl"></i>
+        Pedir por WhatsApp ahora
+      </a>
+
+      <div class="flex items-center justify-center gap-4 mt-3">
+        <span class="text-white/30 text-xs flex items-center gap-1"><i class="fa-solid fa-shield-halved text-green-500/50"></i> Pago por Bizum</span>
+        <span class="text-white/20 text-xs">·</span>
+        <span class="text-white/30 text-xs flex items-center gap-1"><i class="fa-solid fa-truck text-green-500/50"></i> Envío a España</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="px-5 pb-6 text-center">
+    <div class="h-12 w-40 rounded-xl border border-dashed border-white/10 flex items-center justify-center mx-auto mb-3">
+        <span class="text-white/20 text-xs">GolKit</span>
+      </div>
+    <p class="text-white/20 text-xs">Camisetas de fútbol de importación premium · España</p>
+    <p class="text-white/15 text-xs mt-1">© 2025 GolKit · Todos los derechos reservados</p>
+  </footer>
+
+</div><!-- /app-shell -->
+
+<!-- ═══════════════════════════════ BOTTOM NAV ═══════════════════════════════ -->
+<nav class="bottom-nav">
+  <div class="flex items-center justify-around px-3">
+    <a href="#inicio" class="nav-item active flex flex-col items-center gap-0.5" onclick="setActive(this)">
+      <i class="fa-solid fa-house text-lg"></i>
+      <span class="text-xs">Inicio</span>
+    </a>
+    <a href="#precios" class="nav-item flex flex-col items-center gap-0.5" onclick="setActive(this)">
+      <i class="fa-solid fa-tag text-lg"></i>
+      <span class="text-xs">Precios</span>
+    </a>
+    <a href="https://wa.me/34600000000?text=Hola!%20Quiero%20informaci%C3%B3n%20sobre%20una%20camiseta" class="nav-wa-btn flex items-center gap-1.5">
+      <i class="fa-brands fa-whatsapp text-base"></i>
+      Pedir ahora
+    </a>
+    <a href="#testimonios" class="nav-item flex flex-col items-center gap-0.5" onclick="setActive(this)">
+      <i class="fa-solid fa-star text-lg"></i>
+      <span class="text-xs">Reseñas</span>
+    </a>
+    <a href="#como" class="nav-item flex flex-col items-center gap-0.5" onclick="setActive(this)">
+      <i class="fa-solid fa-circle-info text-lg"></i>
+      <span class="text-xs">Info</span>
+    </a>
+  </div>
+</nav>
+
+<script>
+  // FAQ toggle
+  function toggleFaq(btn) {
+    const answer = btn.nextElementSibling;
+    const arrow = btn.querySelector('.faq-arrow');
+    const isOpen = answer.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
+    document.querySelectorAll('.faq-arrow').forEach(a => a.classList.remove('open'));
+    if (!isOpen) {
+      answer.classList.add('open');
+      arrow.classList.add('open');
+    }
+  }
+
+  // Bottom nav active
+  function setActive(el) {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 60);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => io.observe(r));
+
+  // Active nav on scroll
+  const sections = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 100) current = s.id;
+    });
+    document.querySelectorAll('.nav-item[href]').forEach(n => {
+      n.classList.remove('active');
+      if (n.getAttribute('href') === '#' + current) n.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
